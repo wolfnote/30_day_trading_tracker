@@ -34,7 +34,7 @@ def set_theme():
     st.session_state["dark_mode"] = dark_mode
 
     if dark_mode:
-        # 🌑 Dark mode
+        # 🌑 Dark Mode — Black and grey scheme
         st.markdown(
             """
             <style>
@@ -43,22 +43,22 @@ def set_theme():
                 background-color: #333333; color: #e0e0e0; border: 1px solid #4a4a4a;
             }
             .stButton>button:hover { background-color: #555555; color: #ffffff; }
-            .stCheckbox>label { color: #e0e0e0; }
+            .stCheckbox>label, .css-16huue1, .css-1aumxhk, .css-1v0mbdj { color: #e0e0e0; }
             </style>
             """,
             unsafe_allow_html=True,
         )
     else:
-        # 🔷 Light mode with navy blue
+        # 🔷 Light Mode — Dark Navy background, light grey inputs and buttons
         st.markdown(
             """
             <style>
             body, .stApp { background-color: #0a192f; color: #e0e0e0; }
             input, textarea, select, .stButton>button {
-                background-color: #2c3e50; color: #e0e0e0; border: 1px solid #4a4a4a;
+                background-color: #d9d9d9; color: #000000; border: 1px solid #4a4a4a;
             }
-            .stButton>button:hover { background-color: #3e5871; color: #ffffff; }
-            .stCheckbox>label { color: #e0e0e0; }
+            .stButton>button:hover { background-color: #bfbfbf; color: #000000; }
+            .stCheckbox>label, .css-16huue1, .css-1aumxhk, .css-1v0mbdj { color: #e0e0e0; }
             </style>
             """,
             unsafe_allow_html=True,
