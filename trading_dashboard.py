@@ -37,37 +37,37 @@ def set_theme():
         st.markdown(
             """
             <style>
-            body {
+            /* Backgrounds */
+            body, .stApp, .css-18e3th9, .css-1d391kg {
                 background-color: #0e1117;
                 color: #fafafa;
             }
-            .stApp {
-                background-color: #0e1117;
-                color: #fafafa;
-            }
-            .css-18e3th9 {
-                background-color: #0e1117;
-            }
-            .css-1d391kg {
-                background-color: #0e1117;
-            }
+            /* Widgets */
             .st-bx, .st-cb, .st-ba {
                 background-color: #262730;
                 color: #fafafa;
             }
+            /* Buttons */
             .stButton>button {
                 background-color: #262730;
                 color: #fafafa;
                 border: 1px solid #fafafa;
             }
-            .stTextInput>div>div>input {
+            .stButton>button:hover {
+                background-color: #3e3f4b;
+                color: #ffffff;
+            }
+            /* Inputs */
+            input, textarea {
                 background-color: #262730;
                 color: #fafafa;
             }
-            .stSelectbox>div>div>div>div {
+            /* Selectbox */
+            .stSelectbox>div>div>div {
                 background-color: #262730;
                 color: #fafafa;
             }
+            /* Checkbox labels */
             .stCheckbox>label {
                 color: #fafafa;
             }
@@ -79,37 +79,37 @@ def set_theme():
         st.markdown(
             """
             <style>
-            body {
+            /* Backgrounds */
+            body, .stApp, .css-18e3th9, .css-1d391kg {
                 background-color: white;
                 color: black;
             }
-            .stApp {
-                background-color: white;
-                color: black;
-            }
-            .css-18e3th9 {
-                background-color: white;
-            }
-            .css-1d391kg {
-                background-color: white;
-            }
+            /* Widgets */
             .st-bx, .st-cb, .st-ba {
                 background-color: white;
                 color: black;
             }
+            /* Buttons */
             .stButton>button {
                 background-color: white;
                 color: black;
                 border: 1px solid black;
             }
-            .stTextInput>div>div>input {
+            .stButton>button:hover {
+                background-color: #f0f0f0;
+                color: black;
+            }
+            /* Inputs */
+            input, textarea {
                 background-color: white;
                 color: black;
             }
-            .stSelectbox>div>div>div>div {
+            /* Selectbox */
+            .stSelectbox>div>div>div {
                 background-color: white;
                 color: black;
             }
+            /* Checkbox labels */
             .stCheckbox>label {
                 color: black;
             }
