@@ -1,4 +1,61 @@
 import streamlit as st
+import psycopg2
+from config import DB_CONFIG
+
+# --- Function to insert trade ---
+def insert_trade(data):
+    try:
+        conn = psycopg2.connect(**DB_CONFIG)
+        cursor = conn.cursor()
+        insert_query = """
+        INSERT INTO trades (trade_date, trade_time, strategy, stock_symbol, position_type, shares,
+        buy_price, sell_price, stop_loss_price, premarket_news, emotion, net_gain_loss, return_win, return_loss,
+        return_percent, return_percent_loss, total_investment, fees, gross_return, win_flag, ira_trade)
+        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        """
+        cursor.execute(insert_query, data)
+        conn.commit()
+        conn.close()
+        st.success("✅ Trade submitted successfully!")
+    except Exception as e:
+        st.error(f"❌ Error: {e}")
+
+# --- Trade Entry Form ---
+st.header("🚀 Enter New Trade")
+
+with st.form("trade_form"):
+    trade_date = st.date_input("Trade Date")
+    trade_time = st.time_input("Trade Time")
+    strategy = st.selectbox("Strategy", ["Momentum", "Gap & Go", "Reversal", "Scalp"])
+    stock_symbol = st.text_input("Stock Symbol (e.g., AAPL, TSLA)")
+    position_type = st.selectbox("Position Type", ["Long", "Short"])
+    shares = st.number_input("Shares", step=1, min_value=1)
+    buy_price = st.number_input("Buy Price", format="%.2f")
+    sell_price = st.number_input("Sell Price", format="%.2f")
+    stop_loss_price = st.number_input("Stop Loss Price", format="%.2f")
+    premarket_news = st.text_input("Premarket News")
+    emotion = st.selectbox("Emotion", ["Calm", "Rushed", "Confident", "Hesitant"])
+    net_gain_loss = st.number_input("Net Gain/Loss", format="%.2f")
+    return_win = st.number_input("Return Win", format="%.2f")
+    return_loss = st.number_input("Return Loss", format="%.2f")
+    return_percent = st.number_input("Return Percent", format="%.2f")
+    return_percent_loss = st.number_input("Return Percent Loss", format="%.2f")
+    total_investment = st.number_input("Total Investment", format="%.2f")
+    fees = st.number_input("Fees", format="%.2f")
+    gross_return = st.number_input("Gross Return", format="%.2f")
+    win_flag = st.checkbox("Win Flag (Checked = Win)", value=True)
+    ira_trade = st.checkbox("IRA Trade (Checked = Yes)", value=False)
+
+    submitted = st.form_submit_button("Submit Trade")
+    if submitted:
+        insert_trade((
+            trade_date, trade_time, strategy, stock_symbol, position_type, shares,
+            buy_price, sell_price, stop_loss_price, premarket_news, emotion,
+            net_gain_loss, return_win, return_loss, return_percent, return_percent_loss,
+            total_investment, fees, gross_return, win_flag, ira_trade
+        ))
+
+import streamlit as st
 import pandas as pd
 import psycopg2
 from datetime import datetime
