@@ -2,7 +2,6 @@ import streamlit as st
 import psycopg2
 import pandas as pd
 from datetime import datetime
-from config import DB_CONFIG
 
 # -------------------------------
 # 🌟 USER SETTINGS (login)
@@ -11,7 +10,7 @@ USERNAME = "wolfnote"
 PASSWORD = "Beograd!98o"
 
 # -------------------------------
-# 🔌 Database Connection
+# 🔌 Database Connection (Unified run_query)
 # -------------------------------
 def run_query(query, params=None):
     with psycopg2.connect(
@@ -25,9 +24,10 @@ def run_query(query, params=None):
             cursor.execute(query, params)
             if cursor.description:
                 return cursor.fetchall()
+            conn.commit()
 
 # -------------------------------
-# 🌓 Dark Mode Toggle (Fixed ✅)
+# 🌓 Dark Mode Toggle (Final ✅)
 # -------------------------------
 def set_theme():
     if "dark_mode" not in st.session_state:
@@ -37,7 +37,6 @@ def set_theme():
     st.session_state["dark_mode"] = dark_mode
 
     if dark_mode:
-        # 🌑 Dark Mode — Black and grey scheme
         st.markdown(
             """
             <style>
@@ -52,7 +51,6 @@ def set_theme():
             unsafe_allow_html=True,
         )
     else:
-        # 🔷 Light Mode — Dark Navy background, light grey inputs and buttons
         st.markdown(
             """
             <style>
@@ -95,16 +93,13 @@ def check_login():
 # -------------------------------
 def insert_trade(data):
     try:
-        conn = get_connection()
-        cursor = conn.cursor()
         insert_query = """
         INSERT INTO trades (trade_date, trade_time, strategy, stock_symbol, position_type, shares,
         buy_price, sell_price, stop_loss_price, premarket_news, emotion, net_gain_loss, return_win, return_loss,
         return_percent, return_percent_loss, total_investment, fees, gross_return, win_flag, ira_trade)
         VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
-        cursor.execute(insert_query, data)
-        conn.commit()
+        run_query(insert_query, data)
         st.success("✅ Trade submitted successfully!")
         st.experimental_rerun()
     except Exception as e:
@@ -115,10 +110,8 @@ def insert_trade(data):
 # -------------------------------
 def delete_trade(trade_id):
     try:
-        conn = get_connection()
-        cursor = conn.cursor()
-        cursor.execute("DELETE FROM trades WHERE id = %s", (trade_id,))
-        conn.commit()
+        delete_query = "DELETE FROM trades WHERE id = %s"
+        run_query(delete_query, (trade_id,))
         st.success(f"✅ Trade ID {trade_id} deleted successfully!")
         st.experimental_rerun()
     except Exception as e:
@@ -128,14 +121,17 @@ def delete_trade(trade_id):
 # 🚀 App Main
 # -------------------------------
 st.set_page_config(page_title="Trading Dashboard", layout="wide")
-set_theme()  # Apply theme first ✅
+set_theme()
 
 if check_login():
     st.title("📈 Trading Tracker Dashboard")
 
-    # ✅ Load Data after login
-    conn = get_connection()
-    df = pd.read_sql("SELECT * FROM trades ORDER BY trade_date, trade_time", conn)
+    # ✅ Load Data
+    df = pd.DataFrame(run_query("SELECT * FROM trades ORDER BY trade_date, trade_time"),
+                      columns=["id", "trade_date", "trade_time", "strategy", "stock_symbol", "position_type", "shares",
+                               "buy_price", "sell_price", "stop_loss_price", "premarket_news", "emotion",
+                               "net_gain_loss", "return_win", "return_loss", "return_percent", "return_percent_loss",
+                               "total_investment", "fees", "gross_return", "win_flag", "ira_trade"])
 
     # ✅ Preprocess
     df['trade_date'] = pd.to_datetime(df['trade_date'])
@@ -181,7 +177,7 @@ if check_login():
                 total_investment, fees, gross_return, win_flag, ira_trade
             ))
 
-    # 🗑️ Delete Trade by ID (now safe)
+    # 🗑️ Delete Trade
     with st.form("delete_form"):
         st.subheader("🗑️ Delete Trade")
         trade_ids = df['id'].tolist()
