@@ -71,7 +71,8 @@ def check_login():
             if submitted:
                 if username_input == USERNAME and password_input == PASSWORD:
                     st.session_state["logged_in"] = True
-                    st.experimental_rerun()  # Safe to use here at root
+                    st.success("✅ Login successful! Please continue below.")
+                    # 🔥 Remove the rerun here
                 else:
                     st.error("❌ Invalid credentials")
         return False
