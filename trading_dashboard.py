@@ -10,7 +10,7 @@ st.set_page_config(page_title="Trading Dashboard", layout="wide")
 # --- Optional Basic Password Protection ---
 def check_password():
     def password_entered():
-        if st.session_state["password"] == "zoran123":  # ✅ Change your secret password here
+        if st.session_state["password"] == "Beograd!98o":  # ✅ Change your secret password here
             st.session_state["password_correct"] = True
             del st.session_state["password"]  # Don't store password
         else:
