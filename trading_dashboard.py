@@ -13,15 +13,18 @@ PASSWORD = "Beograd!98o"
 # -------------------------------
 # 🔌 Database Connection
 # -------------------------------
-@st.cache_resource
-def get_connection():
-    return psycopg2.connect(
+def run_query(query, params=None):
+    with psycopg2.connect(
         host=st.secrets["host"],
         user=st.secrets["user"],
         password=st.secrets["password"],
         dbname=st.secrets["database"],
         sslmode='require'
-    )
+    ) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(query, params)
+            if cursor.description:
+                return cursor.fetchall()
 
 # -------------------------------
 # 🌓 Dark Mode Toggle (Fixed ✅)
