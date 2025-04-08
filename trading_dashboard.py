@@ -24,7 +24,7 @@ def get_connection():
     )
 
 # -------------------------------
-# 🌓 Dark Mode Toggle
+# 🌓 Dark Mode Toggle (Fixed ✅)
 # -------------------------------
 def set_theme():
     if "dark_mode" not in st.session_state:
@@ -34,77 +34,31 @@ def set_theme():
     st.session_state["dark_mode"] = dark_mode
 
     if dark_mode:
-        # 🌑 FULL DARK MODE
+        # 🌑 Dark mode
         st.markdown(
             """
             <style>
-            body, .stApp {
-                background-color: #000000;
-                color: #e0e0e0;
+            body, .stApp { background-color: #000000; color: #e0e0e0; }
+            input, textarea, select, .stButton>button {
+                background-color: #333333; color: #e0e0e0; border: 1px solid #4a4a4a;
             }
-            input, textarea {
-                background-color: #333333;
-                color: #e0e0e0;
-                border: 1px solid #4a4a4a;
-            }
-            .stButton>button {
-                background-color: #333333;
-                color: #e0e0e0;
-                border: 1px solid #4a4a4a;
-            }
-            .stButton>button:hover {
-                background-color: #555555;
-                color: #ffffff;
-            }
-            .stSelectbox>div>div>div {
-                background-color: #333333;
-                color: #e0e0e0;
-            }
-            .css-1d391kg, .css-18e3th9 {
-                background-color: #000000;
-                color: #e0e0e0;
-            }
-            .stCheckbox>label {
-                color: #e0e0e0;
-            }
+            .stButton>button:hover { background-color: #555555; color: #ffffff; }
+            .stCheckbox>label { color: #e0e0e0; }
             </style>
             """,
             unsafe_allow_html=True,
         )
     else:
-        # 🔷 "Light mode" = Navy blue mode
+        # 🔷 Light mode with navy blue
         st.markdown(
             """
             <style>
-            body, .stApp {
-                background-color: #0a192f;
-                color: #e0e0e0;
+            body, .stApp { background-color: #0a192f; color: #e0e0e0; }
+            input, textarea, select, .stButton>button {
+                background-color: #2c3e50; color: #e0e0e0; border: 1px solid #4a4a4a;
             }
-            input, textarea {
-                background-color: #2c3e50;
-                color: #e0e0e0;
-                border: 1px solid #4a4a4a;
-            }
-            .stButton>button {
-                background-color: #2c3e50;
-                color: #e0e0e0;
-                border: 1px solid #4a4a4a;
-            }
-            .stButton>button:hover {
-                background-color: #3e5871;
-                color: #ffffff;
-            }
-            .stSelectbox>div>div>div {
-                background-color: #2c3e50;
-                color: #e0e0e0;
-            }
-            .css-1d391kg, .css-18e3th9 {
-                background-color: #0a192f;
-                color: #e0e0e0;
-            }
-            .stCheckbox>label {
-                color: #e0e0e0;
-            }
+            .stButton>button:hover { background-color: #3e5871; color: #ffffff; }
+            .stCheckbox>label { color: #e0e0e0; }
             </style>
             """,
             unsafe_allow_html=True,
@@ -128,7 +82,6 @@ def check_login():
                 if username_input == USERNAME and password_input == PASSWORD:
                     st.session_state["logged_in"] = True
                     st.success("✅ Login successful! Please continue below.")
-                    # 🔥 Remove the rerun here
                 else:
                     st.error("❌ Invalid credentials")
         return False
@@ -172,16 +125,16 @@ def delete_trade(trade_id):
 # 🚀 App Main
 # -------------------------------
 st.set_page_config(page_title="Trading Dashboard", layout="wide")
-set_theme()  # Apply theme
+set_theme()  # Apply theme first ✅
 
 if check_login():
     st.title("📈 Trading Tracker Dashboard")
 
-    # Load data
+    # ✅ Load Data after login
     conn = get_connection()
     df = pd.read_sql("SELECT * FROM trades ORDER BY trade_date, trade_time", conn)
 
-    # Preprocess data
+    # ✅ Preprocess
     df['trade_date'] = pd.to_datetime(df['trade_date'])
     df['trade_time'] = pd.to_datetime(df['trade_time'], format='%H:%M', errors='coerce')
     df['hour'] = df['trade_time'].dt.hour
@@ -225,7 +178,7 @@ if check_login():
                 total_investment, fees, gross_return, win_flag, ira_trade
             ))
 
-    # 🗑️ Delete Trade
+    # 🗑️ Delete Trade by ID (now safe)
     with st.form("delete_form"):
         st.subheader("🗑️ Delete Trade")
         trade_ids = df['id'].tolist()
@@ -254,7 +207,6 @@ if check_login():
     # 📝 Checklist
     st.markdown("### 📝 Checklist Status")
     trade_time_check = filtered_df.shape[0] == filtered_df[(filtered_df['hour'] >= 9) & (filtered_df['hour'] <= 12)].shape[0]
-
     st.write("- Trade in simulator only ✅")
     st.write(f"- Trade between 9:30 AM and 12:00 PM: {'✅' if trade_time_check else '⚠️ Some trades outside window'}")
     st.write(f"- Use approved strategies only ✅")
