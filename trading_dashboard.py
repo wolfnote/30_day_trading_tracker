@@ -7,6 +7,28 @@ from config import DB_CONFIG
 # ----- Page Config (must be FIRST!) -----
 st.set_page_config(page_title="Trading Dashboard", layout="wide")
 
+# --- Optional Basic Password Protection ---
+def check_password():
+    def password_entered():
+        if st.session_state["password"] == "zoran123":  # ✅ Change your secret password here
+            st.session_state["password_correct"] = True
+            del st.session_state["password"]  # Don't store password
+        else:
+            st.session_state["password_correct"] = False
+
+    if "password_correct" not in st.session_state:
+        st.text_input("Enter Password", type="password", on_change=password_entered, key="password")
+        return False
+    elif not st.session_state["password_correct"]:
+        st.text_input("Enter Password", type="password", on_change=password_entered, key="password")
+        st.error("😅 Wrong password.")
+        return False
+    else:
+        return True
+
+if not check_password():
+    st.stop()
+
 # --- Database Connection ---
 @st.cache_resource
 def get_connection():
@@ -54,7 +76,7 @@ with st.form("trade_form"):
     trade_date = st.date_input("Trade Date")
     trade_time = st.time_input("Trade Time")
     strategy = st.selectbox("Strategy", ["Momentum", "Gap & Go", "Reversal", "Scalp"])
-    stock_symbol = st.text_input("Stock Symbol (e.g., AAPL, TSLA)")
+    stock_symbol = st.text_input("Stock Symbol (e.g., AAPL, TSLA)").upper()
     position_type = st.selectbox("Position Type", ["Long", "Short"])
     shares = st.number_input("Shares", step=1, min_value=1)
     buy_price = st.number_input("Buy Price", format="%.2f")
@@ -81,11 +103,10 @@ with st.form("trade_form"):
             net_gain_loss, return_win, return_loss, return_percent, return_percent_loss,
             total_investment, fees, gross_return, win_flag, ira_trade
         ))
-        st.experimental_rerun()  # Refresh to see new entry immediately
+        st.experimental_rerun()
 
 # --- Delete Trade by ID ---
 st.header("🗑️ Delete a Trade by ID")
-
 with st.form("delete_form"):
     trade_ids = df['id'].tolist()
     if trade_ids:
@@ -96,19 +117,11 @@ with st.form("delete_form"):
             try:
                 conn = psycopg2.connect(**DB_CONFIG)
                 cursor = conn.cursor()
-
-                # Check if trade exists
-                cursor.execute("SELECT * FROM trades WHERE id = %s", (delete_id,))
-                result = cursor.fetchone()
-
-                if result:
-                    cursor.execute("DELETE FROM trades WHERE id = %s", (delete_id,))
-                    conn.commit()
-                    conn.close()
-                    st.success(f"✅ Trade ID {delete_id} deleted successfully!")
-                    st.experimental_rerun()  # Refresh after deletion
-                else:
-                    st.warning(f"⚠️ No trade found with ID {delete_id}.")
+                cursor.execute("DELETE FROM trades WHERE id = %s", (delete_id,))
+                conn.commit()
+                conn.close()
+                st.success(f"✅ Trade ID {delete_id} deleted successfully!")
+                st.experimental_rerun()
             except Exception as e:
                 st.error(f"❌ Error deleting trade: {e}")
     else:
@@ -136,13 +149,15 @@ col4.metric("Daily Goal", "Reached ✅" if daily_profit >= daily_profit_target e
 # --- Checklist Status ---
 st.markdown("### 📝 Checklist Status")
 trade_time_check = filtered_df.shape[0] == filtered_df[(filtered_df['hour'] >= 9) & (filtered_df['hour'] <= 12)].shape[0]
-
 st.write("- Trade in simulator only ✅")
 st.write(f"- Trade between 9:30 AM and 12:00 PM: {'✅' if trade_time_check else '⚠️ Some trades outside window'}")
 st.write(f"- Use approved strategies only ✅")
 st.write(f"- Max 4 trades/day: {'✅' if daily_trades <= 4 else '⚠️ Exceeded!'}")
 st.write(f"- Daily Max Loss: {'✅' if daily_profit > daily_max_loss else '⚠️ Hit max loss!'}")
 st.write(f"- Daily Profit Target: {'✅' if daily_profit >= daily_profit_target else 'Not yet ❌'}")
+
+# --- Export to CSV ---
+st.download_button("📥 Download All Trades as CSV", data=df.to_csv(index=False).encode('utf-8'), file_name="all_trades.csv", mime="text/csv")
 
 # --- Main Table ---
 st.subheader("🧾 All Trades")
@@ -162,6 +177,16 @@ st.bar_chart(news_impact)
 st.subheader("💼 Profit by Strategy")
 profit_by_strategy = filtered_df.groupby("strategy")["net_gain_loss"].sum().sort_values(ascending=False)
 st.bar_chart(profit_by_strategy)
+
+# --- Strategy Accuracy ---
+st.subheader("📊 Strategy Win Rate")
+strategy_win_rate = filtered_df.groupby("strategy")["win_flag"].mean() * 100
+st.bar_chart(strategy_win_rate)
+
+# --- Profit by Symbol ---
+st.subheader("🏷️ Profit by Symbol")
+profit_by_symbol = filtered_df.groupby("stock_symbol")["net_gain_loss"].sum().sort_values(ascending=False)
+st.bar_chart(profit_by_symbol)
 
 # --- Trade Time Distribution ---
 st.subheader("🕰️ Trade Time Distribution")
