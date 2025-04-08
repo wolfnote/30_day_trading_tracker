@@ -34,84 +34,76 @@ def set_theme():
     st.session_state["dark_mode"] = dark_mode
 
     if dark_mode:
+        # 🌑 FULL DARK MODE
         st.markdown(
             """
             <style>
-            /* Backgrounds */
-            body, .stApp, .css-18e3th9, .css-1d391kg {
-                background-color: #0e1117;
-                color: #fafafa;
+            body, .stApp {
+                background-color: #000000;
+                color: #e0e0e0;
             }
-            /* Widgets */
-            .st-bx, .st-cb, .st-ba {
-                background-color: #262730;
-                color: #fafafa;
+            input, textarea {
+                background-color: #333333;
+                color: #e0e0e0;
+                border: 1px solid #4a4a4a;
             }
-            /* Buttons */
             .stButton>button {
-                background-color: #262730;
-                color: #fafafa;
-                border: 1px solid #fafafa;
+                background-color: #333333;
+                color: #e0e0e0;
+                border: 1px solid #4a4a4a;
             }
             .stButton>button:hover {
-                background-color: #3e3f4b;
+                background-color: #555555;
                 color: #ffffff;
             }
-            /* Inputs */
-            input, textarea {
-                background-color: #262730;
-                color: #fafafa;
-            }
-            /* Selectbox */
             .stSelectbox>div>div>div {
-                background-color: #262730;
-                color: #fafafa;
+                background-color: #333333;
+                color: #e0e0e0;
             }
-            /* Checkbox labels */
+            .css-1d391kg, .css-18e3th9 {
+                background-color: #000000;
+                color: #e0e0e0;
+            }
             .stCheckbox>label {
-                color: #fafafa;
+                color: #e0e0e0;
             }
             </style>
             """,
             unsafe_allow_html=True,
         )
     else:
+        # 🔷 "Light mode" = Navy blue mode
         st.markdown(
             """
             <style>
-            /* Backgrounds */
-            body, .stApp, .css-18e3th9, .css-1d391kg {
-                background-color: white;
-                color: black;
+            body, .stApp {
+                background-color: #0a192f;
+                color: #e0e0e0;
             }
-            /* Widgets */
-            .st-bx, .st-cb, .st-ba {
-                background-color: white;
-                color: black;
+            input, textarea {
+                background-color: #2c3e50;
+                color: #e0e0e0;
+                border: 1px solid #4a4a4a;
             }
-            /* Buttons */
             .stButton>button {
-                background-color: white;
-                color: black;
-                border: 1px solid black;
+                background-color: #2c3e50;
+                color: #e0e0e0;
+                border: 1px solid #4a4a4a;
             }
             .stButton>button:hover {
-                background-color: #f0f0f0;
-                color: black;
+                background-color: #3e5871;
+                color: #ffffff;
             }
-            /* Inputs */
-            input, textarea {
-                background-color: white;
-                color: black;
-            }
-            /* Selectbox */
             .stSelectbox>div>div>div {
-                background-color: white;
-                color: black;
+                background-color: #2c3e50;
+                color: #e0e0e0;
             }
-            /* Checkbox labels */
+            .css-1d391kg, .css-18e3th9 {
+                background-color: #0a192f;
+                color: #e0e0e0;
+            }
             .stCheckbox>label {
-                color: black;
+                color: #e0e0e0;
             }
             </style>
             """,
