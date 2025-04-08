@@ -37,9 +37,40 @@ def set_theme():
         st.markdown(
             """
             <style>
-            body { background-color: #0e1117; color: #fafafa; }
-            .st-bx { background-color: #262730; color: #fafafa; }
-            .st-cb { background-color: #262730; color: #fafafa; }
+            body {
+                background-color: #0e1117;
+                color: #fafafa;
+            }
+            .stApp {
+                background-color: #0e1117;
+                color: #fafafa;
+            }
+            .css-18e3th9 {
+                background-color: #0e1117;
+            }
+            .css-1d391kg {
+                background-color: #0e1117;
+            }
+            .st-bx, .st-cb, .st-ba {
+                background-color: #262730;
+                color: #fafafa;
+            }
+            .stButton>button {
+                background-color: #262730;
+                color: #fafafa;
+                border: 1px solid #fafafa;
+            }
+            .stTextInput>div>div>input {
+                background-color: #262730;
+                color: #fafafa;
+            }
+            .stSelectbox>div>div>div>div {
+                background-color: #262730;
+                color: #fafafa;
+            }
+            .stCheckbox>label {
+                color: #fafafa;
+            }
             </style>
             """,
             unsafe_allow_html=True,
@@ -48,7 +79,40 @@ def set_theme():
         st.markdown(
             """
             <style>
-            body { background-color: white; color: black; }
+            body {
+                background-color: white;
+                color: black;
+            }
+            .stApp {
+                background-color: white;
+                color: black;
+            }
+            .css-18e3th9 {
+                background-color: white;
+            }
+            .css-1d391kg {
+                background-color: white;
+            }
+            .st-bx, .st-cb, .st-ba {
+                background-color: white;
+                color: black;
+            }
+            .stButton>button {
+                background-color: white;
+                color: black;
+                border: 1px solid black;
+            }
+            .stTextInput>div>div>input {
+                background-color: white;
+                color: black;
+            }
+            .stSelectbox>div>div>div>div {
+                background-color: white;
+                color: black;
+            }
+            .stCheckbox>label {
+                color: black;
+            }
             </style>
             """,
             unsafe_allow_html=True,
