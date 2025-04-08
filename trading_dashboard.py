@@ -11,14 +11,29 @@ USERNAME = "wolfnote"
 PASSWORD = "Beograd!98o"
 
 # -------------------------------
+# 🔌 Database Connection
+# -------------------------------
+@st.cache_resource
+def get_connection():
+    return psycopg2.connect(
+        host=st.secrets["host"],
+        user=st.secrets["user"],
+        password=st.secrets["password"],
+        dbname=st.secrets["database"],
+        sslmode='require'
+    )
+
+# -------------------------------
 # 🌓 Dark Mode Toggle
 # -------------------------------
 def set_theme():
     if "dark_mode" not in st.session_state:
         st.session_state["dark_mode"] = False
 
-    if st.sidebar.checkbox("🌓 Dark Mode", value=st.session_state["dark_mode"]):
-        st.session_state["dark_mode"] = True
+    dark_mode = st.sidebar.checkbox("🌓 Dark Mode", value=st.session_state["dark_mode"])
+    st.session_state["dark_mode"] = dark_mode
+
+    if dark_mode:
         st.markdown(
             """
             <style>
@@ -30,7 +45,6 @@ def set_theme():
             unsafe_allow_html=True,
         )
     else:
-        st.session_state["dark_mode"] = False
         st.markdown(
             """
             <style>
@@ -57,25 +71,11 @@ def check_login():
             if submitted:
                 if username_input == USERNAME and password_input == PASSWORD:
                     st.session_state["logged_in"] = True
-                    st.success("✅ Login successful!")
-                    st.experimental_rerun()
+                    st.experimental_rerun()  # Safe to use here at root
                 else:
                     st.error("❌ Invalid credentials")
         return False
     return True
-
-# -------------------------------
-# 🔌 Database Connection
-# -------------------------------
-@st.cache_resource
-def get_connection():
-    return psycopg2.connect(
-        host=st.secrets["host"],
-        user=st.secrets["user"],
-        password=st.secrets["password"],
-        dbname=st.secrets["database"],
-        sslmode='require'
-    )
 
 # -------------------------------
 # 📥 Insert Trade
@@ -93,18 +93,31 @@ def insert_trade(data):
         cursor.execute(insert_query, data)
         conn.commit()
         st.success("✅ Trade submitted successfully!")
+        st.experimental_rerun()
     except Exception as e:
         st.error(f"❌ Error: {e}")
+
+# -------------------------------
+# 🗑️ Delete Trade
+# -------------------------------
+def delete_trade(trade_id):
+    try:
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("DELETE FROM trades WHERE id = %s", (trade_id,))
+        conn.commit()
+        st.success(f"✅ Trade ID {trade_id} deleted successfully!")
+        st.experimental_rerun()
+    except Exception as e:
+        st.error(f"❌ Error deleting trade: {e}")
 
 # -------------------------------
 # 🚀 App Main
 # -------------------------------
 st.set_page_config(page_title="Trading Dashboard", layout="wide")
-
 set_theme()  # Apply theme
 
 if check_login():
-
     st.title("📈 Trading Tracker Dashboard")
 
     # Load data
@@ -116,20 +129,14 @@ if check_login():
     df['trade_time'] = pd.to_datetime(df['trade_time'], format='%H:%M', errors='coerce')
     df['hour'] = df['trade_time'].dt.hour
 
-    # -------------------------------
     # 📆 Date Range Filter
-    # -------------------------------
     st.sidebar.header("📊 Filters")
     start_date, end_date = st.sidebar.date_input("Select Date Range", [datetime.now().date(), datetime.now().date()])
-
     filtered_df = df[(df['trade_date'].dt.date >= start_date) & (df['trade_date'].dt.date <= end_date)]
 
-    # -------------------------------
-    # 📝 Add Trade Form
-    # -------------------------------
+    # 🚀 Enter New Trade
     with st.form("trade_form"):
         st.subheader("🚀 Enter New Trade")
-
         trade_date = st.date_input("Trade Date")
         trade_time = st.time_input("Trade Time")
         strategy = st.selectbox("Strategy", ["Momentum", "Gap & Go", "Reversal", "Scalp"])
@@ -160,33 +167,20 @@ if check_login():
                 net_gain_loss, return_win, return_loss, return_percent, return_percent_loss,
                 total_investment, fees, gross_return, win_flag, ira_trade
             ))
-            st.experimental_rerun()
 
-    # -------------------------------
-    # 🗑️ Delete Trade by ID
-    # -------------------------------
+    # 🗑️ Delete Trade
     with st.form("delete_form"):
         st.subheader("🗑️ Delete Trade")
         trade_ids = df['id'].tolist()
         if trade_ids:
             delete_id = st.selectbox("Select Trade ID to Delete", trade_ids)
             delete_submit = st.form_submit_button("Delete Trade")
-
             if delete_submit:
-                try:
-                    cursor = conn.cursor()
-                    cursor.execute("DELETE FROM trades WHERE id = %s", (delete_id,))
-                    conn.commit()
-                    st.success(f"✅ Trade ID {delete_id} deleted successfully!")
-                    st.experimental_rerun()
-                except Exception as e:
-                    st.error(f"❌ Error deleting trade: {e}")
+                delete_trade(delete_id)
         else:
             st.info("No trades available to delete.")
 
-    # -------------------------------
-    # 📊 Daily Summary
-    # -------------------------------
+    # 📅 Summary
     st.subheader(f"📅 Summary: {start_date} to {end_date}")
     col1, col2, col3, col4 = st.columns(4)
     daily_profit = filtered_df['net_gain_loss'].sum()
@@ -200,9 +194,7 @@ if check_login():
     col3.metric("Win Rate", f"{daily_win_rate:.1f}%")
     col4.metric("Daily Goal", "Reached ✅" if daily_profit >= daily_profit_target else "Not yet ❌")
 
-    # -------------------------------
-    # 📝 Checklist Status
-    # -------------------------------
+    # 📝 Checklist
     st.markdown("### 📝 Checklist Status")
     trade_time_check = filtered_df.shape[0] == filtered_df[(filtered_df['hour'] >= 9) & (filtered_df['hour'] <= 12)].shape[0]
 
@@ -213,15 +205,11 @@ if check_login():
     st.write(f"- Daily Max Loss: {'✅' if daily_profit > daily_max_loss else '⚠️ Hit max loss!'}")
     st.write(f"- Daily Profit Target: {'✅' if daily_profit >= daily_profit_target else 'Not yet ❌'}")
 
-    # -------------------------------
-    # 🧾 Main Table
-    # -------------------------------
+    # 🧾 All Trades
     st.subheader("🧾 All Trades")
     st.dataframe(filtered_df, use_container_width=True)
 
-    # -------------------------------
-    # 📊 Charts & Analysis
-    # -------------------------------
+    # 📊 Charts
     st.subheader("😌 Emotion Tracker")
     st.bar_chart(filtered_df['emotion'].value_counts())
 
@@ -238,9 +226,7 @@ if check_login():
     st.subheader("📅 Monthly Profit")
     st.bar_chart(df.groupby('month')['net_gain_loss'].sum())
 
-    # -------------------------------
     # 📊 Key Stats
-    # -------------------------------
     st.markdown("---")
     st.subheader("📊 Key Stats")
     kpi1, kpi2, kpi3 = st.columns(3)
