@@ -1,12 +1,33 @@
 import streamlit as st
-
-# ----- Page Config (must be FIRST!) -----
-st.set_page_config(page_title="Trading Dashboard", layout="wide")
-
 import psycopg2
 import pandas as pd
 from datetime import datetime
 from config import DB_CONFIG
+
+# ----- Page Config (must be FIRST!) -----
+st.set_page_config(page_title="Trading Dashboard", layout="wide")
+
+# --- Database Connection ---
+@st.cache_resource
+def get_connection():
+    conn = psycopg2.connect(
+        host=st.secrets["host"],
+        user=st.secrets["user"],
+        password=st.secrets["password"],
+        dbname=st.secrets["database"],
+        sslmode='require'
+    )
+    return conn
+
+conn = get_connection()
+
+# --- Load Data ---
+df = pd.read_sql("SELECT * FROM trades ORDER BY trade_date, trade_time", conn)
+
+# --- Preprocessing ---
+df['trade_date'] = pd.to_datetime(df['trade_date'])
+df['trade_time'] = pd.to_datetime(df['trade_time'], format='%H:%M', errors='coerce')
+df['hour'] = df['trade_time'].dt.hour
 
 # --- Function to insert trade ---
 def insert_trade(data):
@@ -60,28 +81,38 @@ with st.form("trade_form"):
             net_gain_loss, return_win, return_loss, return_percent, return_percent_loss,
             total_investment, fees, gross_return, win_flag, ira_trade
         ))
+        st.experimental_rerun()  # Refresh to see new entry immediately
 
-# --- Database Connection ---
-@st.cache_resource
-def get_connection():
-    conn = psycopg2.connect(
-        host=st.secrets["host"],
-        user=st.secrets["user"],
-        password=st.secrets["password"],
-        dbname=st.secrets["database"],
-        sslmode='require'
-    )
-    return conn
+# --- Delete Trade by ID ---
+st.header("🗑️ Delete a Trade by ID")
 
-conn = get_connection()
+with st.form("delete_form"):
+    trade_ids = df['id'].tolist()
+    if trade_ids:
+        delete_id = st.selectbox("Select Trade ID to Delete", trade_ids)
+        delete_submit = st.form_submit_button("Delete Trade")
 
-# --- Load Data ---
-df = pd.read_sql("SELECT * FROM trades ORDER BY trade_date, trade_time", conn)
+        if delete_submit:
+            try:
+                conn = psycopg2.connect(**DB_CONFIG)
+                cursor = conn.cursor()
 
-# --- Preprocessing ---
-df['trade_date'] = pd.to_datetime(df['trade_date'])
-df['trade_time'] = pd.to_datetime(df['trade_time'], format='%H:%M', errors='coerce')
-df['hour'] = df['trade_time'].dt.hour
+                # Check if trade exists
+                cursor.execute("SELECT * FROM trades WHERE id = %s", (delete_id,))
+                result = cursor.fetchone()
+
+                if result:
+                    cursor.execute("DELETE FROM trades WHERE id = %s", (delete_id,))
+                    conn.commit()
+                    conn.close()
+                    st.success(f"✅ Trade ID {delete_id} deleted successfully!")
+                    st.experimental_rerun()  # Refresh after deletion
+                else:
+                    st.warning(f"⚠️ No trade found with ID {delete_id}.")
+            except Exception as e:
+                st.error(f"❌ Error deleting trade: {e}")
+    else:
+        st.warning("⚠️ No trades available to delete.")
 
 # --- Filters ---
 st.sidebar.header("📊 Filters")
