@@ -1,5 +1,11 @@
 import streamlit as st
+
+# ----- Page Config (must be FIRST!) -----
+st.set_page_config(page_title="Trading Dashboard", layout="wide")
+
 import psycopg2
+import pandas as pd
+from datetime import datetime
 from config import DB_CONFIG
 
 # --- Function to insert trade ---
@@ -55,17 +61,7 @@ with st.form("trade_form"):
             total_investment, fees, gross_return, win_flag, ira_trade
         ))
 
-import streamlit as st
-import pandas as pd
-import psycopg2
-from datetime import datetime
-
-# ----- Page Config -----
-st.set_page_config(page_title="Trading Dashboard", layout="wide")
-st.title("📈 Trading Tracker Dashboard")
-
-import psycopg2
-
+# --- Database Connection ---
 @st.cache_resource
 def get_connection():
     conn = psycopg2.connect(
@@ -77,23 +73,22 @@ def get_connection():
     )
     return conn
 
-
 conn = get_connection()
 
-# ----- Load Data -----
+# --- Load Data ---
 df = pd.read_sql("SELECT * FROM trades ORDER BY trade_date, trade_time", conn)
 
-# ----- Preprocessing -----
+# --- Preprocessing ---
 df['trade_date'] = pd.to_datetime(df['trade_date'])
 df['trade_time'] = pd.to_datetime(df['trade_time'], format='%H:%M', errors='coerce')
 df['hour'] = df['trade_time'].dt.hour
 
-# ----- Filters -----
+# --- Filters ---
 st.sidebar.header("📊 Filters")
 selected_date = st.sidebar.date_input("Select Date", datetime.now().date())
 filtered_df = df[df['trade_date'].dt.date == selected_date]
 
-# ----- Daily Summary -----
+# --- Daily Summary ---
 st.subheader(f"📅 Daily Summary for {selected_date}")
 col1, col2, col3, col4 = st.columns(4)
 daily_profit = filtered_df['net_gain_loss'].sum()
@@ -107,7 +102,7 @@ col2.metric("Trades Count", daily_trades)
 col3.metric("Win Rate", f"{daily_win_rate:.1f}%")
 col4.metric("Daily Goal", "Reached ✅" if daily_profit >= daily_profit_target else "Not yet ❌")
 
-# ----- Checklist Status -----
+# --- Checklist Status ---
 st.markdown("### 📝 Checklist Status")
 trade_time_check = filtered_df.shape[0] == filtered_df[(filtered_df['hour'] >= 9) & (filtered_df['hour'] <= 12)].shape[0]
 
@@ -118,37 +113,37 @@ st.write(f"- Max 4 trades/day: {'✅' if daily_trades <= 4 else '⚠️ Exceeded
 st.write(f"- Daily Max Loss: {'✅' if daily_profit > daily_max_loss else '⚠️ Hit max loss!'}")
 st.write(f"- Daily Profit Target: {'✅' if daily_profit >= daily_profit_target else 'Not yet ❌'}")
 
-# ----- Main Table -----
+# --- Main Table ---
 st.subheader("🧾 All Trades")
 st.dataframe(filtered_df, use_container_width=True)
 
-# ----- Emotion Tracker -----
+# --- Emotion Tracker ---
 st.subheader("😌 Emotion Tracker")
 emotion_counts = filtered_df['emotion'].value_counts()
 st.bar_chart(emotion_counts)
 
-# ----- Pre-Market News Impact -----
+# --- Pre-Market News Impact ---
 st.subheader("📰 Pre-Market News Impact")
 news_impact = filtered_df['premarket_news'].value_counts()
 st.bar_chart(news_impact)
 
-# ----- Profit by Strategy -----
+# --- Profit by Strategy ---
 st.subheader("💼 Profit by Strategy")
 profit_by_strategy = filtered_df.groupby("strategy")["net_gain_loss"].sum().sort_values(ascending=False)
 st.bar_chart(profit_by_strategy)
 
-# ----- Trade Time Distribution -----
+# --- Trade Time Distribution ---
 st.subheader("🕰️ Trade Time Distribution")
 trade_times = filtered_df['hour'].value_counts().sort_index()
 st.bar_chart(trade_times)
 
-# ----- Monthly Profit -----
+# --- Monthly Profit ---
 df['month'] = df['trade_date'].dt.to_period('M')
 monthly_profit = df.groupby('month')['net_gain_loss'].sum()
 st.subheader("📅 Monthly Profit")
 st.bar_chart(monthly_profit)
 
-# ----- Summary KPIs -----
+# --- Summary KPIs ---
 total_profit = df['net_gain_loss'].sum()
 win_rate = df['win_flag'].mean() * 100
 num_trades = len(df)
