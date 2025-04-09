@@ -27,7 +27,7 @@ def run_query(query, params=None):
             conn.commit()
 
 # -------------------------------
-# 🌓 Dark Mode Toggle (Final ✅)
+# 🌓 Dark Mode Toggle
 # -------------------------------
 def set_theme():
     if "dark_mode" not in st.session_state:
@@ -133,20 +133,24 @@ if check_login():
                                "net_gain_loss", "return_win", "return_loss", "return_percent", "return_percent_loss",
                                "total_investment", "fees", "gross_return", "win_flag", "ira_trade"])
 
-    # ✅ Preprocess
     df['trade_date'] = pd.to_datetime(df['trade_date'])
     df['trade_time'] = pd.to_datetime(df['trade_time'], format='%H:%M', errors='coerce')
     df['hour'] = df['trade_time'].dt.hour
 
-    # 📆 Date Range Filter
+    # 📆 Date Range Filter with MM-DD-YYYY
     st.sidebar.header("📊 Filters")
-    start_date, end_date = st.sidebar.date_input("Select Date Range", [datetime.now().date(), datetime.now().date()])
+    start_date, end_date = st.sidebar.date_input(
+        "Select Date Range (MM-DD-YYYY)",
+        [datetime.now().date(), datetime.now().date()],
+        format="%m-%d-%Y"
+    )
+
     filtered_df = df[(df['trade_date'].dt.date >= start_date) & (df['trade_date'].dt.date <= end_date)]
 
-    # 🚀 Enter New Trade
+    # 🚀 Trade Form
     with st.form("trade_form"):
         st.subheader("🚀 Enter New Trade")
-        trade_date = st.date_input("Trade Date")
+        trade_date = st.date_input("Trade Date", format="%m-%d-%Y")
         trade_time = st.time_input("Trade Time")
         strategy = st.selectbox("Strategy", ["Momentum", "Gap & Go", "Reversal", "Scalp"])
         stock_symbol = st.text_input("Stock Symbol (e.g., AAPL, TSLA)")
@@ -190,7 +194,7 @@ if check_login():
             st.info("No trades available to delete.")
 
     # 📅 Summary
-    st.subheader(f"📅 Summary: {start_date} to {end_date}")
+    st.subheader(f"📅 Summary: {start_date.strftime('%m-%d-%Y')} to {end_date.strftime('%m-%d-%Y')}")
     col1, col2, col3, col4 = st.columns(4)
     daily_profit = filtered_df['net_gain_loss'].sum()
     daily_trades = filtered_df.shape[0]
@@ -206,6 +210,7 @@ if check_login():
     # 📝 Checklist
     st.markdown("### 📝 Checklist Status")
     trade_time_check = filtered_df.shape[0] == filtered_df[(filtered_df['hour'] >= 9) & (filtered_df['hour'] <= 12)].shape[0]
+
     st.write("- Trade in simulator only ✅")
     st.write(f"- Trade between 9:30 AM and 12:00 PM: {'✅' if trade_time_check else '⚠️ Some trades outside window'}")
     st.write(f"- Use approved strategies only ✅")
@@ -242,14 +247,15 @@ if check_login():
     kpi2.metric("Win Rate", f"{df['win_flag'].mean() * 100:.1f}%")
     kpi3.metric("Total Trades", f"{len(df)}")
 
-    # ✅ Export to CSV (NOW CORRECT!)
+    # 📥 Export to CSV ✅
     st.markdown("---")
     st.subheader("📥 Export Data")
+
     if not filtered_df.empty:
         st.download_button(
             label="💾 Export Filtered Trades to CSV",
             data=filtered_df.to_csv(index=False).encode('utf-8'),
-            file_name=f'trades_export_{datetime.now().strftime("%Y%m%d")}.csv',
+            file_name=f'trades_export_{datetime.now().strftime('%m-%d-%Y')}.csv',
             mime='text/csv'
         )
     else:
