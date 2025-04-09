@@ -241,19 +241,16 @@ if check_login():
     kpi1.metric("Total Profit", f"${df['net_gain_loss'].sum():,.2f}")
     kpi2.metric("Win Rate", f"{df['win_flag'].mean() * 100:.1f}%")
     kpi3.metric("Total Trades", f"{len(df)}")
-    
-    # -------------------------------
-# 📥 Export to CSV
-# -------------------------------
-st.markdown("---")
-st.subheader("📥 Export Data")
 
-if not filtered_df.empty:
-    export_button = st.download_button(
-        label="💾 Export Filtered Trades to CSV",
-        data=filtered_df.to_csv(index=False).encode('utf-8'),
-        file_name=f'trades_export_{datetime.now().strftime("%Y%m%d")}.csv',
-        mime='text/csv'
-    )
-else:
-    st.info("No data to export for the selected date range.")
+    # ✅ Export to CSV (NOW CORRECT!)
+    st.markdown("---")
+    st.subheader("📥 Export Data")
+    if not filtered_df.empty:
+        st.download_button(
+            label="💾 Export Filtered Trades to CSV",
+            data=filtered_df.to_csv(index=False).encode('utf-8'),
+            file_name=f'trades_export_{datetime.now().strftime("%Y%m%d")}.csv',
+            mime='text/csv'
+        )
+    else:
+        st.info("No data to export for the selected date range.")
