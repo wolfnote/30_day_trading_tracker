@@ -37,8 +37,7 @@ def set_theme():
     st.session_state["dark_mode"] = dark_mode
 
     if dark_mode:
-        st.markdown(
-            """
+        st.markdown("""
             <style>
             body, .stApp { background-color: #000000; color: #e0e0e0; }
             input, textarea, select, .stButton>button {
@@ -47,12 +46,9 @@ def set_theme():
             .stButton>button:hover { background-color: #555555; color: #ffffff; }
             .stCheckbox>label, .css-16huue1, .css-1aumxhk, .css-1v0mbdj { color: #e0e0e0; }
             </style>
-            """,
-            unsafe_allow_html=True,
-        )
+            """, unsafe_allow_html=True)
     else:
-        st.markdown(
-            """
+        st.markdown("""
             <style>
             body, .stApp { background-color: #0a192f; color: #e0e0e0; }
             input, textarea, select, .stButton>button {
@@ -61,9 +57,7 @@ def set_theme():
             .stButton>button:hover { background-color: #bfbfbf; color: #000000; }
             .stCheckbox>label, .css-16huue1, .css-1aumxhk, .css-1v0mbdj { color: #e0e0e0; }
             </style>
-            """,
-            unsafe_allow_html=True,
-        )
+            """, unsafe_allow_html=True)
 
 # -------------------------------
 # 🔒 Simple Login
@@ -137,20 +131,20 @@ if check_login():
     df['trade_time'] = pd.to_datetime(df['trade_time'], format='%H:%M', errors='coerce')
     df['hour'] = df['trade_time'].dt.hour
 
-    # 📆 Date Range Filter with MM-DD-YYYY
-    st.sidebar.header("📊 Filters")
-    start_date, end_date = st.sidebar.date_input(
-        "Select Date Range (MM-DD-YYYY)",
-        [datetime.now().date(), datetime.now().date()],
-        format="%m-%d-%Y"
-    )
+    # 📆 Date Range Filter (MM-DD-YYYY)
+    date_range = st.sidebar.date_input("Select Date Range", [datetime.now().date(), datetime.now().date()])
+
+    if isinstance(date_range, tuple) and len(date_range) == 2:
+        start_date, end_date = date_range
+    else:
+        start_date = end_date = date_range
 
     filtered_df = df[(df['trade_date'].dt.date >= start_date) & (df['trade_date'].dt.date <= end_date)]
 
     # 🚀 Trade Form
     with st.form("trade_form"):
         st.subheader("🚀 Enter New Trade")
-        trade_date = st.date_input("Trade Date", format="%m-%d-%Y")
+        trade_date = st.date_input("Trade Date", format="MM-DD-YYYY")
         trade_time = st.time_input("Trade Time")
         strategy = st.selectbox("Strategy", ["Momentum", "Gap & Go", "Reversal", "Scalp"])
         stock_symbol = st.text_input("Stock Symbol (e.g., AAPL, TSLA)")
@@ -250,12 +244,11 @@ if check_login():
     # 📥 Export to CSV ✅
     st.markdown("---")
     st.subheader("📥 Export Data")
-
     if not filtered_df.empty:
         st.download_button(
             label="💾 Export Filtered Trades to CSV",
-            data=filtered_df.to_csv(index=False).encode('utf-8'),
-            file_name=f'trades_export_{datetime.now().strftime('%m-%d-%Y')}.csv',
+            data=filtered_df.to_csv(index=False, date_format="%m-%d-%Y").encode('utf-8'),
+            file_name=f"trades_export_{datetime.now().strftime('%m-%d-%Y')}.csv",
             mime='text/csv'
         )
     else:
