@@ -164,7 +164,7 @@ if check_login():
         st.subheader("🚀 Enter New Trade")
         trade_date = st.date_input("Trade Date", format="MM-DD-YYYY")
         trade_time = st.time_input("Trade Time")
-        strategy = st.selectbox("Strategy", ["Momentum", "Momentum Scaling (25%-50%-25%)" "Gap & Go", "Reversal", "Scalp"])
+        strategy = st.selectbox("Strategy", ["Momentum", "Momentum Scaling (25%-50%-25%)", "Gap & Go", "Reversal", "Scalp"])
         stock_symbol = st.text_input("Stock Symbol (e.g., AAPL, TSLA)")
         position_type = st.selectbox("Position Type", ["Long", "Short"])
         shares = st.number_input("Shares", step=1, min_value=1)
