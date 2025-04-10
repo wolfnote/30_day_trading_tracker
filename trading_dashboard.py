@@ -316,6 +316,8 @@ if check_login():
     col1.metric("Position Size (shares)", f"{position_size:.0f}")
     col2.metric("Total Investment ($)", f"{total_investment:.2f}")
     col3.metric("Max Potential Loss ($)", f"{max_loss:.2f}")
+    
+    col1.metric("Potential Profit ($)", f"{potential_profit:.2f}")
 
     # Confirmation check ✅
     if max_loss > 0 and abs(max_loss - risk_per_trade) <= 0.01:
