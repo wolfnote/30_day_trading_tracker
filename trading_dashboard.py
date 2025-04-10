@@ -88,11 +88,14 @@ def check_login():
 def insert_trade(data):
     try:
         insert_query = """
-        INSERT INTO trades (trade_date, trade_time, strategy, stock_symbol, position_type, shares,
-        buy_price, sell_price, stop_loss_price, premarket_news, emotion, net_gain_loss, return_win, return_loss,
-        return_percent, return_percent_loss, total_investment, fees, gross_return, win_flag, ira_trade)
-        VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+        INSERT INTO trades (
+            trade_date, trade_time, strategy, stock_symbol, position_type, shares,
+            buy_price, sell_price, stop_loss_price, premarket_news, emotion,
+            net_gain_loss, return_win, return_loss, return_percent, return_percent_loss,
+            total_investment, fees, gross_return, win_flag, ira_trade, paper_trade, ondemand_trade
+        ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
+
         run_query(insert_query, data)
         st.success("✅ Trade submitted successfully!")
         st.experimental_rerun()
@@ -123,9 +126,9 @@ if check_login():
     # ✅ Load Data
     df = pd.DataFrame(run_query("SELECT * FROM trades ORDER BY trade_date, trade_time"),
                       columns=["id", "trade_date", "trade_time", "strategy", "stock_symbol", "position_type", "shares",
-                               "buy_price", "sell_price", "stop_loss_price", "premarket_news", "emotion",
-                               "net_gain_loss", "return_win", "return_loss", "return_percent", "return_percent_loss",
-                               "total_investment", "fees", "gross_return", "win_flag", "ira_trade"])
+                            "buy_price", "sell_price", "stop_loss_price", "premarket_news", "emotion",
+                            "net_gain_loss", "return_win", "return_loss", "return_percent", "return_percent_loss",
+                            "total_investment", "fees", "gross_return", "win_flag", "ira_trade", "paper_trade", "ondemand_trade"]
 
     df['trade_date'] = pd.to_datetime(df['trade_date'])
     df['trade_time'] = pd.to_datetime(df['trade_time'], format='%H:%M', errors='coerce')
@@ -165,6 +168,9 @@ if check_login():
         gross_return = st.number_input("Gross Return", format="%.2f")
         win_flag = st.checkbox("Win Flag (Checked = Win)", value=True)
         ira_trade = st.checkbox("IRA Trade (Checked = Yes)", value=False)
+        paper_trade = st.checkbox("Paper Trading", value=False)
+        ondemand_trade = st.checkbox("OnDemand Trade", value=False)
+
 
         submitted = st.form_submit_button("Submit Trade")
         if submitted:
@@ -172,8 +178,9 @@ if check_login():
                 trade_date, trade_time, strategy, stock_symbol, position_type, shares,
                 buy_price, sell_price, stop_loss_price, premarket_news, emotion,
                 net_gain_loss, return_win, return_loss, return_percent, return_percent_loss,
-                total_investment, fees, gross_return, win_flag, ira_trade
+                total_investment, fees, gross_return, win_flag, ira_trade, paper_trade, ondemand_trade
             ))
+
 
     # 🗑️ Delete Trade
     with st.form("delete_form"):
