@@ -144,7 +144,20 @@ if check_login():
     else:
         start_date = end_date = date_range
 
+    # Initial date range filter
     filtered_df = df[(df['trade_date'].dt.date >= start_date) & (df['trade_date'].dt.date <= end_date)]
+
+    # Add sidebar filters for Paper and OnDemand Trades
+    st.sidebar.markdown("### 🧩 Trade Type Filters")
+    paper_filter = st.sidebar.checkbox("Show Paper Trades Only")
+    ondemand_filter = st.sidebar.checkbox("Show OnDemand Trades Only")
+
+    # Apply filters
+    if paper_filter:
+        filtered_df = filtered_df[filtered_df['paper_trade'] == True]
+
+    if ondemand_filter:
+        filtered_df = filtered_df[filtered_df['ondemand_trade'] == True]
 
     # 🚀 Trade Form
     with st.form("trade_form"):
