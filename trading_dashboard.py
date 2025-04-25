@@ -98,7 +98,7 @@ def insert_trade(data):
 
         run_query(insert_query, data)
         st.success("✅ Trade submitted successfully!")
-        st.experimental_rerun()
+        st.rerun()
     except Exception as e:
         st.error(f"❌ Error: {e}")
 
@@ -110,7 +110,7 @@ def delete_trade(trade_id):
         delete_query = "DELETE FROM trades WHERE id = %s"
         run_query(delete_query, (trade_id,))
         st.success(f"✅ Trade ID {trade_id} deleted successfully!")
-        st.experimental_rerun()
+        st.rerun()
     except Exception as e:
         st.error(f"❌ Error deleting trade: {e}")
 
