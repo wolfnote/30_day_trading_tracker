@@ -200,14 +200,18 @@ if check_login():
     # 🗑️ Delete Trade
     with st.form("delete_form"):
         st.subheader("🗑️ Delete Trade")
-        trade_ids = df['id'].tolist()
-        if trade_ids:
+
+        if not df.empty:
+            trade_ids = df['id'].dropna().unique().tolist()
             delete_id = st.selectbox("Select Trade ID to Delete", trade_ids)
             delete_submit = st.form_submit_button("Delete Trade")
-            if delete_submit:
+
+            if delete_submit and delete_id:
                 delete_trade(delete_id)
         else:
             st.info("No trades available to delete.")
+
+
 
     # 📅 Summary
     st.subheader(f"📅 Summary: {start_date.strftime('%m-%d-%Y')} to {end_date.strftime('%m-%d-%Y')}")
