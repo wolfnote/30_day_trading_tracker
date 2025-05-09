@@ -145,7 +145,7 @@ if check_login():
         start_date = end_date = date_range
 
     # Initial date range filter
-    filtered_df = df[(df['trade_date'].dt.date >= start_date) & (df['trade_date'].dt.date <= end_date)]
+    filtered_df = df[(df['trade_date'] >= pd.to_datetime(start_date)) & (df['trade_date'] <= pd.to_datetime(end_date))]
 
     # Add sidebar filters for Paper and OnDemand Trades
     st.sidebar.markdown("### 🧩 Trade Type Filters")
