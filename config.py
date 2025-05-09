@@ -1,8 +1,9 @@
-DB_CONFIG = {
-    'host': 'ep-patient-mouse-a2mrq4x5-pooler.eu-central-1.aws.neon.tech',
-    'port': 5432,
-    'dbname': 'neondb',
-    'user': 'neondb_owner',
-    'password': 'npg_7JG1ezYOyxrZ',  # ✅ This is your password!
-    'sslmode': 'require'
-}
+from config import DB_CONFIG  # ✅ Add this line at the top
+
+def run_query(query, params=None):
+    with psycopg2.connect(**DB_CONFIG) as conn:
+        with conn.cursor() as cursor:
+            cursor.execute(query, params)
+            if cursor.description:
+                return cursor.fetchall()
+            conn.commit()
