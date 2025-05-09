@@ -31,13 +31,13 @@ def run_query(query, params=None):
             conn.commit()
 
 # -------------------------------
-# 🌓 Theme
+# 🌃 Theme
 # -------------------------------
 def set_theme():
     if "dark_mode" not in st.session_state:
         st.session_state["dark_mode"] = False
 
-    dark_mode = st.sidebar.checkbox("🌓 Dark Mode", value=st.session_state["dark_mode"])
+    dark_mode = st.sidebar.checkbox("🌃 Dark Mode", value=st.session_state["dark_mode"])
     st.session_state["dark_mode"] = dark_mode
 
     style = """
@@ -79,7 +79,7 @@ def check_login():
     return True
 
 # -------------------------------
-# 📥 Insert Trade
+# 📅 Insert Trade
 # -------------------------------
 def insert_trade(data):
     insert_query = """
@@ -93,7 +93,7 @@ def insert_trade(data):
     run_query(insert_query, data)
 
 # -------------------------------
-# 🧹 Delete Tools
+# 🔧 Delete Tools
 # -------------------------------
 def delete_trade(trade_id):
     run_query("DELETE FROM trades WHERE id = %s", (trade_id,))
@@ -143,7 +143,7 @@ if check_login():
     handle_csv_upload()
 
     # 🔻 Delete Tools
-    with st.expander("🧨 Delete Tools", expanded=False):
+    with st.expander("🚨 Delete Tools", expanded=False):
         with st.form("delete_tools"):
             st.subheader("🗑️ Delete Trades")
             delete_id = st.number_input("Delete by Trade ID", step=1, min_value=1)
@@ -178,7 +178,7 @@ if check_login():
     df['hour'] = df['trade_time'].dt.hour
 
     # Date Filter
-    date_range = st.sidebar.date_input("📅 Filter Date Range", [datetime.today(), datetime.today()])
+    date_range = st.sidebar.date_input("🗓️ Filter Date Range", [datetime.today(), datetime.today()])
     if isinstance(date_range, tuple) and len(date_range) == 2:
         start_date, end_date = date_range
     else:
@@ -206,4 +206,4 @@ if check_login():
     st.bar_chart(filtered_df['hour'].value_counts().sort_index())
 
     # Export
-    st.download_button("💾 Export CSV", data=filtered_df.to_csv(index=False), file_name="trades_export.csv")
+    st.download_button("📅 Export CSV", data=filtered_df.to_csv(index=False), file_name="trades_export.csv")
