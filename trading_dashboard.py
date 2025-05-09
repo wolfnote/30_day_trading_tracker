@@ -194,7 +194,7 @@ if check_login():
 
     df['trade_date'] = pd.to_datetime(df['trade_date'])
     df['trade_time'] = df['trade_time'].astype(str)
-    df['hour'] = df['trade_time'].dt.hour
+    df['hour'] = pd.to_datetime(df['trade_time'].astype(str), format="%H:%M", errors="coerce").dt.hour
 
     # 📆 Date Range Filter (MM-DD-YYYY)
     date_range = st.sidebar.date_input("Select Date Range", [datetime.now().date(), datetime.now().date()])
