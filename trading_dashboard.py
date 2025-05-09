@@ -193,7 +193,7 @@ if check_login():
     )
 
     df['trade_date'] = pd.to_datetime(df['trade_date'])
-    df['trade_time'] = pd.to_datetime(df['trade_time'], format='%H:%M', errors='coerce')
+    df['trade_time'] = df['trade_time'].astype(str)
     df['hour'] = df['trade_time'].dt.hour
 
     # 📆 Date Range Filter (MM-DD-YYYY)
