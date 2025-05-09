@@ -193,8 +193,14 @@ if check_login():
     )
 
     df['trade_date'] = pd.to_datetime(df['trade_date'])
-    df['trade_time'] = df['trade_time'].astype(str)
-    df['hour'] = pd.to_datetime(df['trade_time'].astype(str), format="%H:%M", errors="coerce").dt.hour
+    from datetime import time  # ✅ Make sure this is already at the top
+
+    # ✅ Extract the hour safely for morning trade filter
+    df['hour'] = df['trade_time'].apply(lambda t: t.hour if isinstance(t, time) else None)
+
+    # ✅ Format trade_time column for display (HH:MM only, no seconds)
+    df['trade_time'] = df['trade_time'].apply(lambda t: t.strftime('%H:%M') if isinstance(t, time) else '')
+
 
     # 📆 Date Range Filter (MM-DD-YYYY)
     date_range = st.sidebar.date_input("Select Date Range", [datetime.now().date(), datetime.now().date()])
@@ -316,9 +322,6 @@ if check_login():
 
     # 🧾 All Trades
     st.subheader("🧾 All Trades")
-
-    # Format time to HH:MM (remove seconds)
-    filtered_df['trade_time'] = filtered_df['trade_time'].apply(lambda t: t.strftime('%H:%M') if pd.notnull(t) else '')
 
     st.dataframe(filtered_df, use_container_width=True)
 
