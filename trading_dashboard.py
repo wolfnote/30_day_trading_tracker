@@ -145,6 +145,28 @@ def delete_trade(trade_id):
         st.error(f"❌ Error deleting trade: {e}")
 
 # -------------------------------
+# 🗑️ Delete Trades in Date Range
+# -------------------------------
+with st.expander("🧹 Bulk Delete Trades by Date Range"):
+    st.warning("⚠️ This will permanently delete all trades between the selected dates.")
+    delete_range = st.date_input("Select Date Range to Delete", [datetime.now().date(), datetime.now().date()])
+
+    if len(delete_range) == 2:
+        delete_start, delete_end = delete_range
+        confirm_bulk_delete = st.button("🗑️ Confirm Bulk Delete")
+
+        if confirm_bulk_delete:
+            try:
+                run_query("""
+                    DELETE FROM trades
+                    WHERE trade_date BETWEEN %s AND %s
+                """, (delete_start, delete_end))
+                st.success(f"✅ Deleted trades from {delete_start} to {delete_end}")
+                st.rerun()
+            except Exception as e:
+                st.error(f"❌ Failed to delete: {e}")
+
+# -------------------------------
 # 🚀 App Main
 # -------------------------------
 st.set_page_config(page_title="Trading Dashboard", layout="wide")
