@@ -3,6 +3,8 @@ import psycopg2
 import pandas as pd
 from datetime import datetime
 
+st.set_page_config(page_title="Trading Dashboard", layout="wide")
+
 # -------------------------------
 # 🌟 USER SETTINGS (login)
 # -------------------------------
@@ -154,7 +156,6 @@ def delete_trade(trade_id):
 # -------------------------------
 # 🚀 App Main
 # -------------------------------
-st.set_page_config(page_title="Trading Dashboard", layout="wide")
 set_theme()
 
 if check_login():
