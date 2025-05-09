@@ -11,43 +11,6 @@ st.set_page_config(page_title="Trading Dashboard", layout="wide")
 USERNAME = "wolfnote"
 PASSWORD = "Beograd!98o"
 
-# 📂 Upload CSV to Bulk Insert Trades
-st.subheader("📂 Import Trades from CSV")
-
-uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"])
-
-if uploaded_file is not None:
-    df_csv = pd.read_csv(uploaded_file)
-
-    column_order = [
-        'trade_date', 'trade_time', 'strategy', 'stock_symbol', 'position_type', 'shares',
-        'buy_price', 'sell_price', 'stop_loss_price', 'premarket_news', 'emotion',
-        'net_gain_loss', 'return_win', 'return_loss', 'return_percent', 'return_percent_loss',
-        'total_investment', 'fees', 'gross_return', 'win_flag', 'ira_trade', 'paper_trade', 'ondemand_trade'
-    ]
-
-    if set(column_order).issubset(df_csv.columns):
-        inserted = 0
-        for i, row in df_csv.iterrows():
-            try:
-                # Handle trade_date conversion if string
-                if isinstance(row['trade_date'], str):
-                    row['trade_date'] = datetime.strptime(row['trade_date'].strip(), '%Y-%m-%d').date()
-
-                # Handle trade_time conversion if string
-                if isinstance(row['trade_time'], str):
-                    row['trade_time'] = datetime.strptime(row['trade_time'].strip(), '%H:%M').time()
-
-                # Ensure all fields in correct order
-                values = tuple(row[col] for col in column_order)
-                insert_trade(values)
-                inserted += 1
-            except Exception as e:
-                st.error(f"❌ Error inserting row {i+1}: {e}")
-        st.success(f"✅ Successfully inserted {inserted} trades.")
-    else:
-        st.warning("⚠️ CSV is missing one or more required columns.")
-
 # -------------------------------
 # 🔌 Database Connection (Unified run_query)
 # -------------------------------
@@ -152,6 +115,43 @@ def delete_trade(trade_id):
         st.rerun()
     except Exception as e:
         st.error(f"❌ Error deleting trade: {e}")
+        
+# 📂 Upload CSV to Bulk Insert Trades
+st.subheader("📂 Import Trades from CSV")
+
+uploaded_file = st.file_uploader("Upload your CSV file", type=["csv"])
+
+if uploaded_file is not None:
+    df_csv = pd.read_csv(uploaded_file)
+
+    column_order = [
+        'trade_date', 'trade_time', 'strategy', 'stock_symbol', 'position_type', 'shares',
+        'buy_price', 'sell_price', 'stop_loss_price', 'premarket_news', 'emotion',
+        'net_gain_loss', 'return_win', 'return_loss', 'return_percent', 'return_percent_loss',
+        'total_investment', 'fees', 'gross_return', 'win_flag', 'ira_trade', 'paper_trade', 'ondemand_trade'
+    ]
+
+    if set(column_order).issubset(df_csv.columns):
+        inserted = 0
+        for i, row in df_csv.iterrows():
+            try:
+                # Handle trade_date conversion if string
+                if isinstance(row['trade_date'], str):
+                    row['trade_date'] = datetime.strptime(row['trade_date'].strip(), '%Y-%m-%d').date()
+
+                # Handle trade_time conversion if string
+                if isinstance(row['trade_time'], str):
+                    row['trade_time'] = datetime.strptime(row['trade_time'].strip(), '%H:%M').time()
+
+                # Ensure all fields in correct order
+                values = tuple(row[col] for col in column_order)
+                insert_trade(values)
+                inserted += 1
+            except Exception as e:
+                st.error(f"❌ Error inserting row {i+1}: {e}")
+        st.success(f"✅ Successfully inserted {inserted} trades.")
+    else:
+        st.warning("⚠️ CSV is missing one or more required columns.")
 
 # -------------------------------
 # 🚀 App Main
