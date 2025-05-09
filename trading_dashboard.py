@@ -163,7 +163,14 @@ if check_login():
     with st.form("trade_form"):
         st.subheader("🚀 Enter New Trade")
         trade_date = st.date_input("Trade Date", format="MM-DD-YYYY")
-        trade_time = st.time_input("Trade Time")
+
+        trade_time_input = st.text_input("Trade Time (HH:MM)", value="15:38")
+        try:
+            trade_time = datetime.strptime(trade_time_input.strip(), "%H:%M").time()
+        except ValueError:
+            st.warning("⏰ Enter time in HH:MM format (e.g., 15:38)")
+            trade_time = None
+
         strategy = st.selectbox("Strategy", ["Momentum", "Momentum Scaling (25%-50%-25%)", "Gap & Go", "Reversal", "Scalp"])
         stock_symbol = st.text_input("Stock Symbol (e.g., AAPL, TSLA)")
         position_type = st.selectbox("Position Type", ["Long", "Short"])
@@ -186,15 +193,17 @@ if check_login():
         paper_trade = st.checkbox("Paper Trading", value=False)
         ondemand_trade = st.checkbox("OnDemand Trade", value=False)
 
-
         submitted = st.form_submit_button("Submit Trade")
-        if submitted:
+        if submitted and trade_time:
             insert_trade((
                 trade_date, trade_time, strategy, stock_symbol, position_type, shares,
                 buy_price, sell_price, stop_loss_price, premarket_news, emotion,
                 net_gain_loss, return_win, return_loss, return_percent, return_percent_loss,
                 total_investment, fees, gross_return, win_flag, ira_trade, paper_trade, ondemand_trade
             ))
+        elif submitted and not trade_time:
+            st.error("❌ Invalid trade time format. Please use HH:MM.")
+
 
 
     # 🗑️ Delete Trade
