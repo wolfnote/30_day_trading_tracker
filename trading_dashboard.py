@@ -147,7 +147,26 @@ set_theme()
 
 if check_login():
     st.title("📈 Trading Tracker Dashboard")
-    import_csv()
+    
+    # 📤 CSV Import Panel (visible inside dashboard)
+    with st.expander("📤 Import Trades from CSV", expanded=False):
+        import_csv()
+
+        # Optional CSV template download button
+        template_columns = [
+            "trade_date", "trade_time", "strategy", "stock_symbol", "position_type", "shares",
+            "buy_price", "sell_price", "stop_loss_price", "premarket_news", "emotion",
+            "net_gain_loss", "return_win", "return_loss", "return_percent", "return_percent_loss",
+            "total_investment", "fees", "gross_return", "win_flag", "ira_trade", "paper_trade", "ondemand_trade"
+        ]
+        template_df = pd.DataFrame(columns=template_columns)
+
+        st.download_button(
+            label="📄 Download CSV Template",
+            data=template_df.to_csv(index=False).encode("utf-8"),
+            file_name="trade_template.csv",
+            mime="text/csv"
+        )
 
     # ✅ Load Data
     df = pd.DataFrame(
