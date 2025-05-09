@@ -83,6 +83,31 @@ def check_login():
     return True
 
 # -------------------------------
+# 📤 Bulk Import Trades from CSV
+# -------------------------------
+def import_csv():
+    st.subheader("📤 Import Trades from CSV")
+    uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
+    if uploaded_file is not None:
+        try:
+            df = pd.read_csv(uploaded_file)
+            required_columns = [
+                "trade_date", "trade_time", "strategy", "stock_symbol", "position_type", "shares",
+                "buy_price", "sell_price", "stop_loss_price", "premarket_news", "emotion",
+                "net_gain_loss", "return_win", "return_loss", "return_percent", "return_percent_loss",
+                "total_investment", "fees", "gross_return", "win_flag", "ira_trade", "paper_trade", "ondemand_trade"
+            ]
+            if not all(col in df.columns for col in required_columns):
+                st.error("❌ CSV format mismatch. Please use the export or template format.")
+                return
+            for _, row in df.iterrows():
+                insert_trade(tuple(row[col] for col in required_columns))
+            st.success("✅ CSV import completed successfully!")
+            st.rerun()
+        except Exception as e:
+            st.error(f"❌ Failed to import: {e}")
+
+# -------------------------------
 # 📥 Insert Trade
 # -------------------------------
 def insert_trade(data):
@@ -122,6 +147,7 @@ set_theme()
 
 if check_login():
     st.title("📈 Trading Tracker Dashboard")
+    import_csv()
 
     # ✅ Load Data
     df = pd.DataFrame(
