@@ -316,7 +316,12 @@ if check_login():
 
     # 🧾 All Trades
     st.subheader("🧾 All Trades")
+
+    # Format time to HH:MM (remove seconds)
+    filtered_df['trade_time'] = filtered_df['trade_time'].dt.strftime('%H:%M')
+
     st.dataframe(filtered_df, use_container_width=True)
+
 
     # 📊 Charts
     st.subheader("😌 Emotion Tracker")
