@@ -318,7 +318,7 @@ if check_login():
     st.subheader("🧾 All Trades")
 
     # Format time to HH:MM (remove seconds)
-    filtered_df['trade_time'] = filtered_df['trade_time'].dt.strftime('%H:%M')
+    filtered_df['trade_time'] = filtered_df['trade_time'].apply(lambda t: t.strftime('%H:%M') if pd.notnull(t) else '')
 
     st.dataframe(filtered_df, use_container_width=True)
 
