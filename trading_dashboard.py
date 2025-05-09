@@ -91,6 +91,8 @@ def import_csv():
     if uploaded_file is not None:
         try:
             df = pd.read_csv(uploaded_file)
+            df["trade_time"] = pd.to_datetime(df["trade_time"], format="%H:%M", errors="coerce").dt.time
+
             required_columns = [
                 "trade_date", "trade_time", "strategy", "stock_symbol", "position_type", "shares",
                 "buy_price", "sell_price", "stop_loss_price", "premarket_news", "emotion",
@@ -124,6 +126,14 @@ def insert_trade(data, rerun=True):
             total_investment, fees, gross_return, win_flag, ira_trade, paper_trade, ondemand_trade
         ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
+        from datetime import time
+
+        # Ensure trade_time is a proper time object
+        if isinstance(data[1], pd.Timestamp):
+            data = list(data)
+            data[1] = data[1].time()
+            data = tuple(data)
+
         run_query(insert_query, data)
         if rerun:
             st.success("✅ Trade submitted successfully!")
