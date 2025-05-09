@@ -100,17 +100,21 @@ def import_csv():
             if not all(col in df.columns for col in required_columns):
                 st.error("❌ CSV format mismatch. Please use the export or template format.")
                 return
-            for _, row in df.iterrows():
-                insert_trade(tuple(row[col] for col in required_columns))
-            st.success("✅ CSV import completed successfully!")
-            st.rerun()
+            if "csv_imported" not in st.session_state:
+                for _, row in df.iterrows():
+                    insert_trade(tuple(row[col] for col in required_columns), rerun=False)
+
+                st.session_state["csv_imported"] = True
+                st.success("✅ CSV import completed successfully!")
+                st.rerun()
+
         except Exception as e:
             st.error(f"❌ Failed to import: {e}")
 
 # -------------------------------
 # 📥 Insert Trade
 # -------------------------------
-def insert_trade(data):
+def insert_trade(data, rerun=True):
     try:
         insert_query = """
         INSERT INTO trades (
@@ -120,12 +124,13 @@ def insert_trade(data):
             total_investment, fees, gross_return, win_flag, ira_trade, paper_trade, ondemand_trade
         ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
         """
-
         run_query(insert_query, data)
-        st.success("✅ Trade submitted successfully!")
-        st.rerun()
+        if rerun:
+            st.success("✅ Trade submitted successfully!")
+            st.rerun()
     except Exception as e:
         st.error(f"❌ Error: {e}")
+
 
 # -------------------------------
 # 🗑️ Delete Trade
